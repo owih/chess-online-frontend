@@ -47,6 +47,14 @@ class Cell {
     return true;
   }
 
+  isEmptyCircle(target: Cell): boolean {
+    if ((target.x > this.x + 1 || target.x < this.x - 1)
+      || (target.y > this.y + 1 || target.y < this.y - 1)) {
+      return false;
+    }
+    return true;
+  }
+
   isEmptyHorizontal(target: Cell): boolean {
     if (this.y !== target.y) {
       return false;

@@ -3,7 +3,7 @@ import logo from '../../../assets/figures/King-black.svg';
 import Cell from '../Cell';
 
 export enum FigureName {
-  FIGURE = 'Kigure',
+  FIGURE = 'Figure',
   KING = 'King',
   QUEEN = 'Queen',
   KNIGHT = 'Knight',

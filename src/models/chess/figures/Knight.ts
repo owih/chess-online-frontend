@@ -8,7 +8,7 @@ class Knight extends Figure {
   constructor(color: Colors, cell: Cell) {
     super(color, cell);
 
-    this.logo = color === Colors.WHITE ? blackLogo : whiteLogo;
+    this.logo = color === Colors.WHITE ? whiteLogo : blackLogo;
     this.name = FigureName.KNIGHT;
   }
 

@@ -4,16 +4,19 @@ import styles from './BoardComponent.module.scss';
 import Board from '../../models/chess/Board';
 import CellComponent from '../CellComponent/CellComponent';
 import Cell from '../../models/chess/Cell';
+import Player from '../../models/chess/Player';
 
 interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
+  currentPlayer: Player | null;
+  swapPlayer: () => void;
 }
 
-export default function BoardComponent({ board, setBoard }: BoardProps) {
+export default function BoardComponent({
+  board, setBoard, swapPlayer, currentPlayer,
+}: BoardProps) {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
-
-  console.count('RENDER');
 
   const updateBoard = () => {
     const newBoard = board.getCopyBoard();
@@ -30,9 +33,10 @@ export default function BoardComponent({ board, setBoard }: BoardProps) {
       selectedCell.moveFigure(cell);
       setSelectedCell(null);
       updateBoard();
+      swapPlayer();
     } else if (cell === selectedCell) {
       setSelectedCell(null);
-    } else if (cell.figure?.color) {
+    } else if (cell.figure?.color === currentPlayer?.color) {
       setSelectedCell(cell);
     }
   };

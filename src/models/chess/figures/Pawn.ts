@@ -9,7 +9,7 @@ class Pawn extends Figure {
   constructor(color: Colors, cell: Cell) {
     super(color, cell);
 
-    this.logo = color === Colors.WHITE ? blackLogo : whiteLogo;
+    this.logo = color === Colors.WHITE ? whiteLogo : blackLogo;
     this.name = FigureName.PAWN;
   }
 
@@ -20,22 +20,26 @@ class Pawn extends Figure {
     const direction = this.cell.figure?.color === Colors.BLACK ? 1 : -1;
     const firstStepDirection = this.cell.figure?.color === Colors.BLACK ? 2 : -2;
 
-    console.log(target, ' TARGET');
-    console.log(this.cell, ' CELL');
-
-    console.log(firstStepDirection);
-
-    if (((target.y === this.cell.y + direction)
+    if (!this.isFirstStep
+      && ((target.y === this.cell.y + direction)
       && target.x === this.cell.x
       && this.cell.board.getCell(target.x, target.y).isEmpty())) {
-      console.log('FIRST TRUE');
+      return true;
+    }
+
+    if (this.isFirstStep
+      && (((target.y === this.cell.y + firstStepDirection)
+        || (target.y === this.cell.y + direction))
+        && (target.x === this.cell.x)
+        && (this.cell.board.getCell(target.x, target.y).isEmpty())
+        && (this.cell.board.getCell(target.x, this.cell.y + direction).isEmpty())
+      )) {
       return true;
     }
 
     if (target.y === this.cell.y + direction
       && (target.x === this.cell.x + 1 || target.x === this.cell.x - 1)
       && this.cell.isEnemy(target)) {
-      console.log('SECOND TRUE');
       return true;
     }
 
