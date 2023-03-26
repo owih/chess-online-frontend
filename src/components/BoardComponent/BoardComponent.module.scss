@@ -4,6 +4,7 @@
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
+  border: 8px solid $black;
 
   @include media-breakpoint-up(lg) {
     width: 800px;

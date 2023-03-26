@@ -1,13 +1,28 @@
-.cell {
+@import "src/style/variables";
+
+button.cell {
   display: flex;
   align-items: center;
   justify-content: center;
-}
 
-.cell_black {
-  background-color: $black-cell;
-}
+  img {
+    width: 90%;
+    height: 90%;
+  }
 
-.cell_white {
-  background-color: $white-cell;
+  &_black {
+    background-color: $black-cell;
+  }
+
+  &_white {
+    background-color: $white-cell;
+  }
+
+  &_selected {
+    background-color: $selected-cell;
+  }
+
+  &_target {
+    background-color: $target-cell;
+  }
 }
