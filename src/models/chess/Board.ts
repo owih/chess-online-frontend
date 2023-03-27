@@ -6,9 +6,16 @@ import Knight from './figures/Knight';
 import Bishop from './figures/Bishop';
 import Queen from './figures/Queen';
 import King from './figures/King';
+import Figure, { FigureName } from './figures/Figure';
 
 class Board {
   cells: Cell[][] = [];
+  lostBlackFigures: Figure[] = [];
+  lostWhiteFigures: Figure[] = [];
+  whiteKing: King | null = null;
+  blackKing: King | null = null;
+  isCheckState: { state: boolean, king: King | null } = { state: false, king: null };
+  isCheckmateState: { state: boolean, king: King | null } = { state: false, king: null };
 
   public initCells() {
     for (let i = 0; i < 8; i++) {
@@ -44,6 +51,79 @@ class Board {
     }
   }
 
+  public checkKingsState(color: Colors) {
+    this.isCheckState = { state: false, king: null };
+    this.checkIsKingReachable();
+    if (this.isCheckState.state) {
+      console.log('========================= check mock ===========================');
+    }
+    if (this.isCheckState.state) {
+      this.checkIsCheckmate(color);
+    }
+  }
+
+  checkIsCheckmate(color: Colors) {
+    if (color === this.isCheckState.king?.color) {
+      this.isCheckmateState = { state: true, king: this.isCheckState.king };
+      console.log('========================= checkmate mock ===========================');
+    }
+  }
+
+  checkIsKingReachable() {
+    for (let i = 0; i < this.cells.length; i++) {
+      const row = this.cells[i];
+      for (let j = 0; j < row.length; j++) {
+        const target = row[j];
+        this.checkIsTargetDangerousForKing(target);
+      }
+    }
+  }
+
+  checkIsTargetDangerousForKing(target: Cell) {
+    if (!target.figure || !this.whiteKing || !this.blackKing) {
+      return;
+    }
+    [this.whiteKing, this.blackKing].forEach((king) => {
+      if (target.figure?.color === king.color) {
+        return;
+      }
+      if (king.cell.isEmptyHorizontal(target) || king.cell.isEmptyVertical(target)) {
+        if (FigureName.ROOK === target.figure?.name || FigureName.QUEEN === target.figure?.name) {
+          console.log(target, ` is dangerous for ${king.color} king`);
+          this.isCheckState = { state: true, king };
+          return;
+        }
+      }
+      if (king.cell.isEmptyDiagonal(target)) {
+        if (FigureName.BISHOP === target.figure?.name || FigureName.QUEEN === target.figure?.name) {
+          console.log(target, ` is dangerous for ${king.color} king`);
+          this.isCheckState = { state: true, king };
+          return;
+        }
+      }
+      if (king.cell.isEmptyCorner(target)) {
+        if (FigureName.KNIGHT === target.figure?.name) {
+          console.log(target, ` is dangerous for ${king.color} king`);
+          this.isCheckState = { state: true, king };
+          return;
+        }
+      }
+      if (king.cell.isEmptyCircle(target)) {
+        if (FigureName.KING === target.figure?.name) {
+          console.log(target, ` is dangerous for ${king.color} king`);
+          this.isCheckState = { state: true, king };
+          return;
+        }
+      }
+      if (king.cell.isEmptyPawnZone(target, king.color)) {
+        if (FigureName.PAWN === target.figure?.name) {
+          console.log(target, ` is dangerous for ${king.color} king`);
+          this.isCheckState = { state: true, king };
+        }
+      }
+    });
+  }
+
   private addPawns() {
     for (let i = 0; i < 8; i++) {
       new Pawn(Colors.BLACK, this.getCell(i, 1));
@@ -52,8 +132,8 @@ class Board {
   }
 
   private addKings() {
-    new King(Colors.BLACK, this.getCell(4, 0));
-    new King(Colors.WHITE, this.getCell(4, 7));
+    this.whiteKing = new King(Colors.WHITE, this.getCell(4, 7));
+    this.blackKing = new King(Colors.BLACK, this.getCell(4, 0));
   }
 
   private addQueens() {

@@ -7,12 +7,11 @@ import Player from '../models/chess/Player';
 
 export default function ChessPage() {
   const [board, setBoard] = useState<Board>(new Board());
-  const [whitePlayer, setWhitePlayer] = useState<Player>(new Player(Colors.WHITE));
-  const [blackPlayer, setBlackPlayer] = useState<Player>(new Player(Colors.BLACK));
+  const [whitePlayer] = useState<Player>(new Player(Colors.WHITE));
+  const [blackPlayer] = useState<Player>(new Player(Colors.BLACK));
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
 
-  console.log(setWhitePlayer);
-  console.log(setBlackPlayer);
+  console.count('PAGE RENDERED');
 
   const restart = () => {
     const newBoard = new Board();

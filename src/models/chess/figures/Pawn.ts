@@ -3,6 +3,7 @@ import Colors from '../Colors';
 import Cell from '../Cell';
 import blackLogo from '../../../assets/figures/Pawn-black.svg';
 import whiteLogo from '../../../assets/figures/Pawn-white.svg';
+import Queen from './Queen';
 
 class Pawn extends Figure {
   isFirstStep: boolean = true;
@@ -49,6 +50,21 @@ class Pawn extends Figure {
   moveFigure(target: Cell) {
     super.moveFigure(target);
     this.isFirstStep = false;
+    this.checkIsEndOfTheBoard();
+  }
+
+  checkIsEndOfTheBoard() {
+    if (this.color === Colors.BLACK && this.cell.y === 7) {
+      this.replacePawn();
+    }
+    if (this.color === Colors.WHITE && this.cell.y === 0) {
+      this.replacePawn();
+    }
+  }
+
+  replacePawn() {
+    console.log('end of the board');
+    this.cell.setFigure(new Queen(this.color, this.cell));
   }
 }
 

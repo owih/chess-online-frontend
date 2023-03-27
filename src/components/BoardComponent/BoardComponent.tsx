@@ -30,6 +30,7 @@ export default function BoardComponent({
 
   const onClickCell = (cell: Cell): any => {
     if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
+      console.log(selectedCell.figure);
       selectedCell.moveFigure(cell);
       setSelectedCell(null);
       updateBoard();
@@ -37,6 +38,7 @@ export default function BoardComponent({
     } else if (cell === selectedCell) {
       setSelectedCell(null);
     } else if (cell.figure?.color === currentPlayer?.color) {
+      console.log('set selected cell');
       setSelectedCell(cell);
     }
   };

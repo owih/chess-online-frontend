@@ -32,6 +32,24 @@ class Cell {
     return false;
   }
 
+  isEmptyPawnZone(target: Cell, color: Colors): boolean {
+    const direction = color === Colors.BLACK ? 1 : -1;
+
+    if (target.y === this.y + direction
+      && (target.x === this.x + 1 || target.x === this.x - 1)
+      && this.isEnemy(target)) {
+      return true;
+    }
+    return false;
+  }
+
+  isEmptyCorner(target: Cell): boolean {
+    const dx = Math.abs(this.x - target.x);
+    const dy = Math.abs(this.y - target.y);
+
+    return (dx === 1 && dy === 2) || (dx === 2 && dy === 1);
+  }
+
   isEmptyVertical(target: Cell): boolean {
     if (this.x !== target.x) {
       return false;
@@ -95,17 +113,23 @@ class Cell {
 
   moveFigure(target: Cell) {
     if (this.figure && this.figure?.canMove(target)) {
-      this.figure.moveFigure(target);
       if (target.figure) {
         this.addLostFigure(target.figure);
       }
       target.setFigure(this.figure);
+      this.figure.moveFigure(target);
+      const figureColor = this.figure.color;
       this.figure = null;
+      this.board.checkKingsState(figureColor);
     }
   }
 
   addLostFigure(figure: Figure) {
-    console.log(figure, this);
+    if (figure.color === Colors.BLACK) {
+      this.board.lostBlackFigures.push(figure);
+    } else {
+      this.board.lostWhiteFigures.push(figure);
+    }
   }
 }
 

@@ -24,6 +24,7 @@
       "import/prefer-default-export": "off",
       "react/no-array-index-key": "off",
       "no-new": "off",
-      "click-events-have-key-events": "off"
+      "click-events-have-key-events": "off",
+      "class-methods-use-this": "off"
     }
 }

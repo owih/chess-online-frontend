@@ -39,7 +39,7 @@ class Figure {
   }
 
   moveFigure(target: Cell) {
-    console.log(target, this);
+    console.log(target);
   }
 }
 
