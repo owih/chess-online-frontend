@@ -1,0 +1,23 @@
+@import "src/style/variables";
+
+.modal-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: $white;
+  padding: 32px;
+
+  @include media-breakpoint-up(lg) {
+    width: 1200px;
+    min-height: 80vh;
+  }
+};
+
+.small {
+  @include media-breakpoint-up(lg) {
+    width: 600px;
+    min-height: 600px;
+  }
+}

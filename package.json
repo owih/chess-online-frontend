@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.15",
     "@reduxjs/toolkit": "^1.9.3",
     "@types/node": "^16.18.20",
     "@types/react": "^18.0.29",
@@ -38,6 +42,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-redux": "^7.1.25",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "eslint": "^8.2.0",

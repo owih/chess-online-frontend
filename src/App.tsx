@@ -1,10 +1,13 @@
 import React from 'react';
 import AppRouter from './router/AppRouter';
+import DefaultLayout from './layouts/DefaultLayout';
 
 function App() {
   return (
     <div className="App">
-      <AppRouter />
+      <DefaultLayout>
+        <AppRouter />
+      </DefaultLayout>
     </div>
   );
 }

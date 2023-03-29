@@ -1,8 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import chessReducer from './ChessSlice';
+import userReducer from './UserSlice';
+import modalsReducer from './ModalsSlice';
 
-const rootReducer = combineReducers({
-  chessReducer,
+export const rootReducer = combineReducers({
+  user: userReducer,
+  modals: modalsReducer,
 });
 
-export default rootReducer;
+export type RootState = ReturnType<typeof rootReducer>;
