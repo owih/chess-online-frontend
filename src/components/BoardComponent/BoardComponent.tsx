@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import styles from './BoardComponent.module.scss';
 import Board from '../../models/chess/Board';
 import CellComponent from '../CellComponent/CellComponent';
 import Cell from '../../models/chess/Cell';
@@ -48,7 +47,7 @@ export default function BoardComponent({
   }, [selectedCell]);
 
   return (
-    <div className={styles.board}>
+    <div className="board">
       {board.cells.map((item, index) => (
         <React.Fragment key={index}>
           {item.map((cell: Cell) => (

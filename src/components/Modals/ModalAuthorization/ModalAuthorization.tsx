@@ -3,13 +3,24 @@ import { Box, Button, TextField } from '@mui/material';
 import { useState } from 'react';
 import ModalComponent from '../ModalComponent/ModalComponent';
 import ModalName from '../../../types/app/Modal/modalName';
+import { useCreateUserMutation } from '../../../services/userService';
+import { useAppDispatch } from '../../../hooks/redux';
+import { toggle } from '../../../store/reducers/ModalsSlice';
 
 export default function ModalAuthorization() {
-  const [formLogin, setFormLogin] = useState<string>('');
+  const [form, setForm] = useState<{ name: string }>({ name: '' });
+  const [authorization, { error, isLoading }] = useCreateUserMutation();
+  const dispatch = useAppDispatch();
 
-  const onSubmitFormHandler = (e: React.FormEvent):void => {
+  const onSubmitFormHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formLogin);
+    if (!form.name.trim().length || form.name.trim().length > 15 || form.name.trim().length < 3) {
+      return;
+    }
+    authorization(form.name)
+      .then(() => {
+        dispatch(toggle(ModalName.AUTH));
+      });
   };
 
   return (
@@ -19,10 +30,12 @@ export default function ModalAuthorization() {
           required
           variant="outlined"
           label="Name"
-          value={formLogin}
-          onChange={(e) => setFormLogin(e.target.value)}
+          value={form.name}
+          onChange={(e) => setForm({ name: e.target.value })}
         />
         <Button variant="contained" type="submit">Submit</Button>
+        {isLoading && 'loading'}
+        {error && 'Something went wrong!'}
       </Box>
     </ModalComponent>
   );

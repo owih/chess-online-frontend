@@ -7,4 +7,8 @@ export default {
     name: 'Chess',
     url: '/chess',
   },
+  lobby: {
+    name: 'Lobby',
+    url: '/lobby',
+  },
 };

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import ModalsStore from '../../types/app/Modal/modalsStore';
 import ModalName from '../../types/app/Modal/modalName';
 
@@ -7,14 +7,18 @@ const initialState: ModalsStore = {
     name: ModalName.AUTH,
     isOpen: false,
   },
+  [ModalName.SETTINGS]: {
+    name: ModalName.SETTINGS,
+    isOpen: false,
+  },
 };
 
 const modalsSlice = createSlice({
   name: 'modals',
   initialState,
   reducers: {
-    toggle: (state: ModalsStore): void => {
-      state.auth.isOpen = !state.auth.isOpen;
+    toggle: (state: ModalsStore, action: PayloadAction<ModalName>): void => {
+      state[action.payload].isOpen = !state[action.payload].isOpen;
     },
   },
 });

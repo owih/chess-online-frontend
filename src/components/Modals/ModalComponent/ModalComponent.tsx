@@ -3,7 +3,6 @@ import { Box, Modal, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import ModalName from '../../../types/app/Modal/modalName';
 import { toggle } from '../../../store/reducers/ModalsSlice';
-import styles from './ModalComponent.module.scss';
 import ModalSize from '../../../types/app/Modal/modalSize';
 
 interface Props {
@@ -19,7 +18,7 @@ export default function ModalComponent({
   const dispatch = useAppDispatch();
   const isModalOpen = useAppSelector((state) => state.modals[modalName].isOpen);
   const handleClose = () => {
-    dispatch(toggle());
+    dispatch(toggle(modalName));
   };
 
   return (
@@ -28,7 +27,7 @@ export default function ModalComponent({
         open={isModalOpen}
         onClose={handleClose}
       >
-        <Box className={[styles['modal-wrapper'], styles[size]].join(' ')}>
+        <Box className={['modal-wrapper', `modal-wrapper_${size}`].join(' ')}>
           <Typography variant="h5">{title}</Typography>
           {children}
         </Box>

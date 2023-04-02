@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './CellComponent.module.scss';
+import { useMemo } from 'react';
 import Cell from '../../models/chess/Cell';
 import Colors from '../../models/chess/Colors';
 import AvailableComponent from '../AvailableComponent/AvailableComponent';
@@ -11,7 +11,9 @@ type CellProps = {
 };
 
 export default function CellComponent({ cell, isSelected, click }: CellProps) {
-  const cellColorClass = cell.color === Colors.WHITE ? styles.cell_white : styles.cell_black;
+  const cellColorClass = cell.color === Colors.WHITE ? 'cell_white' : 'cell_black';
+  const cellSelectedClass = useMemo(() => (isSelected ? 'cell_selected' : ''), [isSelected]);
+  const cellAvailable = cell.available && cell.figure ? 'cell_target' : '';
 
   const onClickCell = () => {
     click(cell);
@@ -19,12 +21,12 @@ export default function CellComponent({ cell, isSelected, click }: CellProps) {
 
   return (
     <button
-      className={[styles.cell, cellColorClass, isSelected ? styles.cell_selected : '', cell.available && cell.figure ? styles.cell_target : ''].join(' ')}
+      className={['cell', cellColorClass, cellSelectedClass, cellAvailable].join(' ')}
       onClick={onClickCell}
       type="button"
     >
       {!cell.figure && cell.available && <AvailableComponent />}
-      {cell.figure?.logo && <img src={cell.figure.logo} alt={cell.figure.name} />}
+      {cell.figure?.logo && <img className="cell__img" src={cell.figure.logo} alt={cell.figure.name} />}
     </button>
   );
 }
