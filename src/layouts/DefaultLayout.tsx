@@ -1,8 +1,6 @@
 import React from 'react';
 import { Container } from '@mui/material';
-import ModalAuthorization from '../components/Modals/ModalAuthorization/ModalAuthorization';
 import Loading from '../components/Loading/Loading';
-import ModalSettings from '../components/Modals/ModalSettings/ModalSettings';
 
 interface Props {
   isLoading: boolean,
@@ -20,8 +18,6 @@ function DefaultLayout({ isLoading, children }: Props) {
       <Container>
         {children}
       </Container>
-      <ModalAuthorization />
-      <ModalSettings />
     </div>
   );
 }

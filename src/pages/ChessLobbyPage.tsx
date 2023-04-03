@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export default function ChessLobby() {
+export default function ChessLobbyPage() {
   return (
     <div>
       Content

@@ -7,15 +7,13 @@ import UserInfoPanel from '../components/UserInfoPanel/UserInfoPanel';
 import { toggle } from '../store/reducers/ModalsSlice';
 import ModalName from '../types/app/Modal/modalName';
 import useRouteList from '../composables/useRouteList';
+import ModalAuthorization from '../components/Modals/ModalAuthorization/ModalAuthorization';
 
 export default function HomePage() {
   const isUserAuthorized = useAppSelector((state) => state.user.isAuthorized);
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const onClickModal = () => {
-    dispatch(toggle(ModalName.AUTH));
-  };
 
   const onClickStartGame = () => {
     if (isUserAuthorized) {
@@ -34,7 +32,7 @@ export default function HomePage() {
         <Grid lg={6} item>
           {isUserAuthorized
             ? <UserInfoPanel />
-            : <Button type="button" variant="contained" onClick={onClickModal}>Registration</Button>}
+            : <ModalAuthorization />}
           <Button type="button" variant="contained" onClick={onClickStartGame}>Start game!</Button>
         </Grid>
       </Grid>

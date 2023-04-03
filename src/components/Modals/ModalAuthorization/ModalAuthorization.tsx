@@ -12,6 +12,10 @@ export default function ModalAuthorization() {
   const [authorization, { error, isLoading }] = useCreateUserMutation();
   const dispatch = useAppDispatch();
 
+  const onClickAuthorization = () => {
+    dispatch(toggle(ModalName.AUTH));
+  };
+
   const onSubmitFormHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim().length || form.name.trim().length > 15 || form.name.trim().length < 3) {
@@ -24,19 +28,22 @@ export default function ModalAuthorization() {
   };
 
   return (
-    <ModalComponent modalName={ModalName.AUTH} title="Authorization">
-      <Box component="form" onSubmit={onSubmitFormHandler}>
-        <TextField
-          required
-          variant="outlined"
-          label="Name"
-          value={form.name}
-          onChange={(e) => setForm({ name: e.target.value })}
-        />
-        <Button variant="contained" type="submit">Submit</Button>
-        {isLoading && 'loading'}
-        {error && 'Something went wrong!'}
-      </Box>
-    </ModalComponent>
+    <div>
+      <Button type="button" variant="contained" onClick={onClickAuthorization}>Authorization</Button>
+      <ModalComponent modalName={ModalName.AUTH} title="Authorization">
+        <Box component="form" onSubmit={onSubmitFormHandler}>
+          <TextField
+            required
+            variant="outlined"
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm({ name: e.target.value })}
+          />
+          <Button variant="contained" type="submit">Submit</Button>
+          {isLoading && 'loading'}
+          {error && 'Something went wrong!'}
+        </Box>
+      </ModalComponent>
+    </div>
   );
 }

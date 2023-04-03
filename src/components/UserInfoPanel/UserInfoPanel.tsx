@@ -1,18 +1,9 @@
 import * as React from 'react';
-import { Button } from '@mui/material';
-import { useAppDispatch } from '../../hooks/redux';
-import { toggle } from '../../store/reducers/ModalsSlice';
-import modalName from '../../types/app/Modal/modalName';
 import { useGetUserInfo } from '../../hooks/useGetUserInfo';
+import ModalSettings from '../Modals/ModalSettings/ModalSettings';
 
 export default function UserInfoPanel() {
   const { data, error, isLoading } = useGetUserInfo();
-
-  const dispatch = useAppDispatch();
-
-  const onClickSettings = () => {
-    dispatch(toggle(modalName.SETTINGS));
-  };
 
   return (
     <div>
@@ -27,7 +18,7 @@ export default function UserInfoPanel() {
       <div>
         Photo (future)
       </div>
-      <Button type="button" variant="contained" onClick={onClickSettings}>Settings</Button>
+      <ModalSettings />
     </div>
   );
 }
