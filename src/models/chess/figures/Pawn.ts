@@ -21,14 +21,14 @@ class Pawn extends Figure {
     const direction = this.cell.figure?.color === Colors.BLACK ? 1 : -1;
     const firstStepDirection = this.cell.figure?.color === Colors.BLACK ? 2 : -2;
 
-    if (!this.isFirstStep
+    if (!this.checkIsFirstMove()
       && ((target.y === this.cell.y + direction)
       && target.x === this.cell.x
       && this.cell.board.getCell(target.x, target.y).isEmpty())) {
       return true;
     }
 
-    if (this.isFirstStep
+    if (this.checkIsFirstMove()
       && (((target.y === this.cell.y + firstStepDirection)
         || (target.y === this.cell.y + direction))
         && (target.x === this.cell.x)
@@ -44,6 +44,16 @@ class Pawn extends Figure {
       return true;
     }
 
+    return false;
+  }
+
+  checkIsFirstMove() {
+    if (this.color === Colors.BLACK && this.cell.y === 1) {
+      return true;
+    }
+    if (this.color === Colors.WHITE && this.cell.y === 6) {
+      return true;
+    }
     return false;
   }
 

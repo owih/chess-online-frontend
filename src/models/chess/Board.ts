@@ -7,6 +7,7 @@ import Bishop from './figures/Bishop';
 import Queen from './figures/Queen';
 import King from './figures/King';
 import Figure, { FigureName } from './figures/Figure';
+import ChessGameLoadedCell from '../../types/chess/chess-game-loaded-cell';
 
 class Board {
   cells: Cell[][] = [];
@@ -18,6 +19,8 @@ class Board {
   isCheckmateState: { state: boolean, king: King | null } = { state: false, king: null };
 
   public initCells() {
+    this.cells = [];
+    console.log('init sellcs');
     for (let i = 0; i < 8; i++) {
       const row: Cell[] = [];
       for (let j = 0; j < 8; j++) {
@@ -39,6 +42,57 @@ class Board {
     const newBoard = new Board();
     newBoard.cells = this.cells;
     return newBoard;
+  }
+
+  public applyStateFromServer(state: ChessGameLoadedCell[][]) {
+    console.log(state);
+    state.forEach((row) => row.forEach((cell) => {
+      this.getFigureClassFromName(cell.x, cell.y, cell.figure, cell.color);
+    }));
+    console.log(this.cells);
+  }
+
+  private getFigureClassFromName(
+    x: number,
+    y: number,
+    figureName: FigureName | undefined,
+    color: Colors | undefined,
+  ) {
+    if (!figureName || !color) {
+      this.getCell(x, y).figure = null;
+      return;
+    }
+    switch (figureName) {
+      case 'Rook':
+        new Rook(color, this.getCell(x, y));
+        break;
+      case 'Knight':
+        new Knight(color, this.getCell(x, y));
+        break;
+      case 'King':
+        new King(color, this.getCell(x, y));
+        break;
+      case 'Queen':
+        new Queen(color, this.getCell(x, y));
+        break;
+      case 'Pawn':
+        new Pawn(color, this.getCell(x, y));
+        break;
+      case 'Bishop':
+        new Bishop(color, this.getCell(x, y));
+        break;
+      default:
+        this.getCell(x, y).figure = null;
+    }
+  }
+
+  public getBoardState() {
+    const cellsToSend = this.cells.map((row) => row.map((cell) => (
+      {
+        ...cell, figure: cell.figure?.name, color: cell.figure?.color, board: null,
+      }
+    )));
+    return cellsToSend;
   }
 
   public highlightTargetCells(selectedCell: Cell | null) {

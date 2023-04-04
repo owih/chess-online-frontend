@@ -3,19 +3,22 @@ import { useEffect, useState } from 'react';
 import Board from '../../models/chess/Board';
 import CellComponent from '../CellComponent/CellComponent';
 import Cell from '../../models/chess/Cell';
-import Player from '../../models/chess/Player';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { setCurrentPlayer, setState } from '../../store/reducers/ChessGameRoomSlice';
+import Colors from '../../models/chess/Colors';
 
 interface BoardProps {
   board: Board;
   setBoard: (board: Board) => void;
-  currentPlayer: Player | null;
-  swapPlayer: () => void;
 }
 
 export default function BoardComponent({
-  board, setBoard, swapPlayer, currentPlayer,
+  board, setBoard,
 }: BoardProps) {
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+  const currentPlayer = useAppSelector((state) => state.chessGameRoom.currentPlayer);
+
+  const dispatch = useAppDispatch();
 
   const updateBoard = () => {
     const newBoard = board.getCopyBoard();
@@ -29,14 +32,14 @@ export default function BoardComponent({
 
   const onClickCell = (cell: Cell): any => {
     if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
-      console.log(selectedCell.figure);
       selectedCell.moveFigure(cell);
       setSelectedCell(null);
       updateBoard();
-      swapPlayer();
+      dispatch(setCurrentPlayer(Colors.WHITE));
+      dispatch(setState(JSON.stringify(board.getBoardState())));
     } else if (cell === selectedCell) {
       setSelectedCell(null);
-    } else if (cell.figure?.color === currentPlayer?.color) {
+    } else if (cell.figure?.color === currentPlayer) {
       console.log('set selected cell');
       setSelectedCell(cell);
     }

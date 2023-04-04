@@ -1,6 +1,6 @@
 interface ChessGameState {
   id: number,
-  stateId: string,
+  state: string,
 }
 
 export default ChessGameState;
