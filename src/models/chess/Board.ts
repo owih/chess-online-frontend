@@ -7,7 +7,8 @@ import Bishop from './figures/Bishop';
 import Queen from './figures/Queen';
 import King from './figures/King';
 import Figure, { FigureName } from './figures/Figure';
-import ChessGameLoadedCell from '../../types/chess/chess-game-loaded-cell';
+import ChessGameLoadedCell from '../../types/chess/chessGameLoadedCell';
+import ChessGameState from '../../types/chess/chessGameState';
 
 class Board {
   cells: Cell[][] = [];
@@ -15,6 +16,7 @@ class Board {
   lostWhiteFigures: Figure[] = [];
   whiteKing: King | null = null;
   blackKing: King | null = null;
+  currentPlayer: Colors = Colors.WHITE;
   isCheckState: { state: boolean, king: King | null } = { state: false, king: null };
   isCheckmateState: { state: boolean, king: King | null } = { state: false, king: null };
 
@@ -41,15 +43,17 @@ class Board {
   public getCopyBoard(): Board {
     const newBoard = new Board();
     newBoard.cells = this.cells;
+    newBoard.currentPlayer = this.currentPlayer;
     return newBoard;
   }
 
-  public applyStateFromServer(state: ChessGameLoadedCell[][]) {
+  public applyStateFromServer(state: ChessGameState) {
     console.log(state);
-    state.forEach((row) => row.forEach((cell) => {
+    const { cells, currentPlayer } = state;
+    cells.forEach((row) => row.forEach((cell) => {
       this.getFigureClassFromName(cell.x, cell.y, cell.figure, cell.color);
     }));
-    console.log(this.cells);
+    this.currentPlayer = currentPlayer;
   }
 
   private getFigureClassFromName(
@@ -87,12 +91,16 @@ class Board {
   }
 
   public getBoardState() {
-    const cellsToSend = this.cells.map((row) => row.map((cell) => (
+    const boardState = <ChessGameState>{};
+    const cellsToSend: ChessGameLoadedCell[][] = this.cells.map((row) => row.map((cell) => (
       {
         ...cell, figure: cell.figure?.name, color: cell.figure?.color, board: null,
       }
     )));
-    return cellsToSend;
+    boardState.cells = cellsToSend;
+    boardState.currentPlayer = this.currentPlayer;
+    console.log(boardState);
+    return boardState;
   }
 
   public highlightTargetCells(selectedCell: Cell | null) {
@@ -103,6 +111,11 @@ class Board {
         target.available = !!selectedCell?.figure?.canMove(target);
       }
     }
+  }
+
+  public toggleCurrentPlayer() {
+    this.currentPlayer = this.currentPlayer === Colors.WHITE ? Colors.BLACK : Colors.WHITE;
+    console.log(this.currentPlayer, ' toggle player');
   }
 
   public checkKingsState(color: Colors) {

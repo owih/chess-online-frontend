@@ -1,11 +1,12 @@
-import Colors from '../../models/chess/Colors';
+import ChessGameState from './chessGameState';
+import ChessGameProcess from './chessGameProcess';
 
 interface ChessGameRoom {
   gameId: string,
-  state: string;
+  state: ChessGameState;
   whitePlayerId: number | null;
   blackPlayerId: number | null;
-  currentPlayer: Colors;
   viewersId: number[];
+  gameProcess: ChessGameProcess;
 }
 export default ChessGameRoom;

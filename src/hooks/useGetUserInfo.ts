@@ -2,7 +2,7 @@ import { skipToken } from '@reduxjs/toolkit/query';
 import { useAppSelector } from './redux';
 import { useGetUserQuery } from '../services/userService';
 
-export const useGetUserInfo = () => {
+export default () => {
   const userId = useAppSelector((state) => state.user.id);
   console.log(userId);
 

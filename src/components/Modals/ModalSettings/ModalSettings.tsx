@@ -3,7 +3,7 @@ import { Box, Button, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import ModalComponent from '../ModalComponent/ModalComponent';
 import { useChangeUserSettingsMutation } from '../../../services/userService';
-import { useGetUserInfo } from '../../../hooks/useGetUserInfo';
+import useGetUserInfo from '../../../hooks/useGetUserInfo';
 import User from '../../../types/user/user';
 import { toggle } from '../../../store/reducers/ModalsSlice';
 import { useAppDispatch } from '../../../hooks/redux';

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useGetUserInfo } from '../../hooks/useGetUserInfo';
+import useGetUserInfo from '../../hooks/useGetUserInfo';
 import ModalSettings from '../Modals/ModalSettings/ModalSettings';
 
 export default function UserInfoPanel() {

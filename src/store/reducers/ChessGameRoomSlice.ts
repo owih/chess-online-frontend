@@ -1,51 +1,49 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import Colors from '../../models/chess/Colors';
-import ChessGameRoom from '../../types/chess/chess-game-room';
+import ChessGameRoom from '../../types/chess/chessGameRoom';
+import ChessGameState from '../../types/chess/chessGameState';
+import ChessGameProcess from '../../types/chess/chessGameProcess';
 
 interface ChessGameRoomStore {
   gameId: string;
-  state: string;
+  state: ChessGameState | null;
   whitePlayerId: number | null;
   blackPlayerId: number | null;
-  currentPlayer: Colors;
   viewersId: number[];
+  gameProcess: ChessGameProcess;
 }
 
 const initialState: ChessGameRoomStore = {
   gameId: '',
-  state: '',
-  currentPlayer: Colors.WHITE,
+  state: null,
   whitePlayerId: null,
   blackPlayerId: null,
   viewersId: [],
+  gameProcess: ChessGameProcess.ENDED,
 };
 
 const chessGameRoomSlice = createSlice({
   name: 'chess',
   initialState,
   reducers: {
-    setState: (state: ChessGameRoomStore, action: PayloadAction<string>) => {
+    setGameState: (state, action: PayloadAction<ChessGameState>) => {
+      console.log(action.payload, ' setChessGameState');
       state.state = action.payload;
     },
-    setGameId: (state: ChessGameRoomStore, action: PayloadAction<string>) => {
+    setGameId: (state, action: PayloadAction<string>) => {
       state.gameId = action.payload;
     },
-    setCurrentPlayer: (state: ChessGameRoomStore, action: PayloadAction<Colors>) => {
-      state.currentPlayer = action.payload;
+    setGameProcess: (state, action: PayloadAction<ChessGameProcess>) => {
+      state.gameProcess = action.payload;
     },
-    toggleCurrentPlayer: (state: ChessGameRoomStore) => {
-      state.currentPlayer = state.currentPlayer === Colors.WHITE
-        ? Colors.BLACK
-        : Colors.WHITE;
-    },
-    updateStateFromApi: (state, action: PayloadAction<ChessGameRoom>) => {
-      state = { ...action.payload };
-    },
+    updateStateFromApi: (state, action: PayloadAction<ChessGameRoom>) => action.payload,
   },
 });
 
 const { actions, reducer } = chessGameRoomSlice;
 export const {
-  setState, setGameId, setCurrentPlayer, toggleCurrentPlayer, updateStateFromApi,
+  setGameState,
+  setGameId,
+  updateStateFromApi,
+  setGameProcess,
 } = actions;
 export default reducer;

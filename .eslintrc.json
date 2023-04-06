@@ -22,9 +22,8 @@
       "import/no-cycle": "off",
       "@typescript-eslint/lines-between-class-members": "off",
       "import/prefer-default-export": "off",
-      "react/no-array-index-key": "off",
+      "react/no-array-index-key": "off", // Render chess-board structure //
       "no-new": "off",
-      "click-events-have-key-events": "off",
       "class-methods-use-this": "off",
       "no-param-reassign": "off",
       "react/require-default-props": "off"

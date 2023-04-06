@@ -1,5 +1,7 @@
 import { io, Socket } from 'socket.io-client';
-import ChessGameEvent from '../types/chess/chess-game-event';
+import ChessGameEvent from '../types/chess/chessGameEvent';
+import ChessGameWebsocketResponse from '../types/chess/chessGameWebsocketResponse';
+import ChessGameState from '../types/chess/chessGameState';
 
 class GameSocket {
   gameId: string;
@@ -15,24 +17,47 @@ class GameSocket {
     });
   }
 
+  private checkIsSelfMadeMessage(userId: number) {
+    console.log(this.userId === userId, ' checkIsSelfMadeMessage');
+    return this.userId === userId;
+  }
+
   public connectToServer() {
     this.socket.connect();
   }
 
-  public sendEventWithData(event: ChessGameEvent, data: any) {
-    console.log(data);
-    this.socket.emit(event, { room: this.gameId, userId: this.userId, data });
+  public sendUpdatedChessState(data: ChessGameState) {
+    console.log(data, ' sended data');
+    this.socket.emit(ChessGameEvent.EVENT, { room: this.gameId, userId: this.userId, data });
   }
 
   public connectUserToGameRoom() {
     this.socket.emit(ChessGameEvent.JOIN_ROOM, { room: this.gameId, userId: this.userId });
   }
 
-  public onReceivedMessage(event: ChessGameEvent, callback: any) {
-    return this.socket.on(event, callback);
+  public registerOnChessGameEvent(callback: (state: ChessGameState) => void) {
+    this.socket.on(ChessGameEvent.EVENT, (response: ChessGameWebsocketResponse) => {
+      if (this.checkIsSelfMadeMessage(response.userId)) {
+        return;
+      }
+
+      console.log(response, 'response data');
+
+      callback(response.data);
+    });
   }
 
-  public onConnect(callback: any) {
+  // public onLeaveRoomMessage(event: ChessGameEvent, callback: () => void) {
+  //   if (this.checkIsSelfMadeMessage(data.userId)) {
+  //     return;
+  //   }
+  //
+  //   this.socket.on(event, () => {
+  //     callback();
+  //   });
+  // }
+
+  public onConnect(callback: () => void) {
     console.log('connect');
     return this.socket.on('connect', callback);
   }

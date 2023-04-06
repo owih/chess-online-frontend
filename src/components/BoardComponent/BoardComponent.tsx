@@ -3,51 +3,77 @@ import { useEffect, useState } from 'react';
 import Board from '../../models/chess/Board';
 import CellComponent from '../CellComponent/CellComponent';
 import Cell from '../../models/chess/Cell';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { setCurrentPlayer, setState } from '../../store/reducers/ChessGameRoomSlice';
-import Colors from '../../models/chess/Colors';
+import { useAppSelector } from '../../hooks/redux';
+import ChessGameState from '../../types/chess/chessGameState';
+import ChessGameProcess from '../../types/chess/chessGameProcess';
 
 interface BoardProps {
-  board: Board;
-  setBoard: (board: Board) => void;
+  updateChessState: (board: ChessGameState) => void;
+  chessGameProcess: ChessGameProcess;
 }
 
-export default function BoardComponent({
-  board, setBoard,
-}: BoardProps) {
+export default function BoardComponent({ updateChessState, chessGameProcess }: BoardProps) {
+  const [board, setBoard] = useState<Board>(new Board());
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
-  const currentPlayer = useAppSelector((state) => state.chessGameRoom.currentPlayer);
+  const chessGameState = useAppSelector((state) => state.chessGameRoom.state);
 
-  const dispatch = useAppDispatch();
+  useEffect(() => {
+    console.log(chessGameProcess);
+  }, [chessGameProcess]);
 
-  const updateBoard = () => {
+  useEffect(() => {
+    if (!chessGameState || !board) {
+      return;
+    }
+
+    console.log(chessGameState, ' state update');
+    board.applyStateFromServer(chessGameState);
+    setBoard(board.getCopyBoard());
+  }, [chessGameState]);
+
+  useEffect(() => {
+    const newBoard = new Board();
+    newBoard.initCells();
+    newBoard.addFigures();
+    setBoard(newBoard);
+    console.log(board.getBoardState());
+  }, []);
+
+  const updateBoardModel = () => {
     const newBoard = board.getCopyBoard();
     setBoard(newBoard);
   };
 
-  const highlightTargetCells = () => {
-    board.highlightTargetCells(selectedCell);
-    updateBoard();
+  console.log('HIGHTLIGHT');
+
+  const updateCellState = (cell: Cell | null) => {
+    board.highlightTargetCells(cell);
+    setSelectedCell(cell);
   };
 
   const onClickCell = (cell: Cell): any => {
     if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
       selectedCell.moveFigure(cell);
-      setSelectedCell(null);
-      updateBoard();
-      dispatch(setCurrentPlayer(Colors.WHITE));
-      dispatch(setState(JSON.stringify(board.getBoardState())));
-    } else if (cell === selectedCell) {
-      setSelectedCell(null);
-    } else if (cell.figure?.color === currentPlayer) {
-      console.log('set selected cell');
-      setSelectedCell(cell);
+      updateCellState(null);
+      board.toggleCurrentPlayer();
+      updateChessState(board.getBoardState());
+      updateBoardModel();
+      console.log(board);
+      return;
+    }
+
+    if (cell === selectedCell) {
+      updateCellState(null);
+      return;
+    }
+
+    if (cell.figure?.color === board.currentPlayer) {
+      console.log(cell.figure.color);
+      console.log(board.currentPlayer);
+      console.log('logger');
+      updateCellState(cell);
     }
   };
-
-  useEffect(() => {
-    highlightTargetCells();
-  }, [selectedCell]);
 
   return (
     <div className="board">
