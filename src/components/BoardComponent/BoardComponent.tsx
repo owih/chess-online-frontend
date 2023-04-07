@@ -6,9 +6,10 @@ import Cell from '../../models/chess/Cell';
 import { useAppSelector } from '../../hooks/redux';
 import ChessGameState from '../../types/chess/chessGameState';
 import ChessGameProcess from '../../types/chess/chessGameProcess';
+import Colors from '../../models/chess/Colors';
 
 interface BoardProps {
-  updateChessState: (board: ChessGameState) => void;
+  updateChessState: (updatedChessState: ChessGameState, currentPlayer: Colors) => void;
   chessGameProcess: ChessGameProcess;
 }
 
@@ -26,7 +27,17 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
       return;
     }
 
+    if (!board.cells.length) {
+      const newBoard = new Board();
+      newBoard.initCells();
+      newBoard.addFigures();
+      newBoard.applyStateFromServer(chessGameState);
+      setBoard(newBoard);
+      return;
+    }
+
     console.log(chessGameState, ' state update');
+    console.log(board);
     board.applyStateFromServer(chessGameState);
     setBoard(board.getCopyBoard());
   }, [chessGameState]);
@@ -36,6 +47,7 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
     newBoard.initCells();
     newBoard.addFigures();
     setBoard(newBoard);
+    console.log('INITED AND LOADED FIRST');
     console.log(board.getBoardState());
   }, []);
 
@@ -56,7 +68,7 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
       selectedCell.moveFigure(cell);
       updateCellState(null);
       board.toggleCurrentPlayer();
-      updateChessState(board.getBoardState());
+      updateChessState(board.getBoardState(), board.currentPlayer);
       updateBoardModel();
       console.log(board);
       return;

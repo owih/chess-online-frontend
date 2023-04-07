@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import ChessGameRoom from '../types/chess/chessGameRoom';
 import { updateStateFromApi } from '../store/reducers/ChessGameRoomSlice';
+import ChessGameRoomRaw from '../types/chess/chessGameRoomRaw';
 
 export const chessApi = createApi({
   reducerPath: 'chessApi',
@@ -13,6 +14,9 @@ export const chessApi = createApi({
     }),
     startChessGame: build.query<ChessGameRoom, string>({
       query: (id) => `chess/start/${id}`,
+      transformResponse(base: ChessGameRoomRaw): ChessGameRoom {
+        return { ...base, state: JSON.parse(base.state || 'null') };
+      },
       async onQueryStarted(idm, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -24,12 +28,13 @@ export const chessApi = createApi({
       },
       providesTags: () => [{ type: 'Chess', id: 'current-game-state' }],
     }),
-    sendUpdatedRoom: build.mutation<boolean, ChessGameRoom>({
-      query: (state) => ({
+    sendUpdatedRoom: build.mutation<boolean, Partial<ChessGameRoom>>({
+      query: (newState) => ({
         url: 'chess',
         method: 'POST',
         body: {
-          state,
+          ...newState,
+          state: JSON.stringify(newState.state),
         },
       }),
     }),

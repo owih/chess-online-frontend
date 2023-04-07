@@ -1,9 +1,7 @@
-import ChessGameState from './chessGameState';
-
-interface ChessGameWebsocketResponse {
+interface ChessGameWebsocketResponse<T> {
   userId: number;
   room: string;
-  data: ChessGameState;
+  data: T;
 }
 
 export default ChessGameWebsocketResponse;

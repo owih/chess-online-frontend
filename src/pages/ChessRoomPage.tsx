@@ -7,11 +7,11 @@ import AuthorizationForm from '../components/AuthorizationForm/AuthorizationForm
 import ChessGameRoom from '../components/ChessGameRoom/ChessGameRoom';
 
 export default function ChessRoomPage() {
-  const userId = useAppSelector((state) => state.user.id);
+  const userId = useAppSelector((state) => state.user.user?.id);
   const { id: gameId } = useParams();
-  const { isLoading } = useStartChessGameQuery(gameId ?? skipToken);
+  const { data, isLoading } = useStartChessGameQuery(gameId ?? skipToken);
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <div>Loading...</div>
     );

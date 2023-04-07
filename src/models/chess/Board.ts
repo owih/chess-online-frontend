@@ -49,6 +49,7 @@ class Board {
 
   public applyStateFromServer(state: ChessGameState) {
     console.log(state);
+    console.log(this.cells);
     const { cells, currentPlayer } = state;
     cells.forEach((row) => row.forEach((cell) => {
       this.getFigureClassFromName(cell.x, cell.y, cell.figure, cell.color);

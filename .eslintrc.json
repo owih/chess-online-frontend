@@ -19,13 +19,14 @@
     ],
     "rules": {
       "no-plusplus": "off",
-      "import/no-cycle": "off",
+      "import/no-cycle": "off", // ok in our chess game model
       "@typescript-eslint/lines-between-class-members": "off",
       "import/prefer-default-export": "off",
       "react/no-array-index-key": "off", // Render chess-board structure //
       "no-new": "off",
       "class-methods-use-this": "off",
       "no-param-reassign": "off",
-      "react/require-default-props": "off"
+      "react/require-default-props": "off",
+      "max-len": ["error", { "code": 120 }]
     }
 }

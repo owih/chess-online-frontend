@@ -1,9 +1,15 @@
 import * as React from 'react';
+import User from '../../types/user/user';
+import ViewerCard from '../ViewerCard/ViewerCard';
 
-export default function ViewersPanel() {
+interface Props {
+  viewers: User[];
+}
+
+export default function ViewersPanel({ viewers }: Props) {
   return (
     <div>
-      Viewers
+      {viewers.map((viewer) => <ViewerCard key={viewer.id} viewer={viewer} />)}
     </div>
   );
 }
