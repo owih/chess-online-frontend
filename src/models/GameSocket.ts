@@ -6,6 +6,7 @@ import ChessGameProcess from '../types/chess/chessGameProcess';
 import ChessGameViewers from '../types/chess/chessGameViewers';
 import ChessGameMemberEvent from '../types/chess/chessGameMemberEvent';
 import ChessGamePlayer from '../types/chess/chessGamePlayer';
+import ChessGameMember from '../types/chess/chessGameMember';
 
 class GameSocket {
   gameId: string;
@@ -13,7 +14,6 @@ class GameSocket {
   socket: Socket;
 
   constructor(gameId: string, userId: number) {
-    console.log('INIT CLASS SOCKET');
     this.gameId = gameId;
     this.userId = userId;
     this.socket = io(`${process.env.REACT_APP_WEBSOCKET_URL}`, {
@@ -22,7 +22,6 @@ class GameSocket {
   }
 
   private checkIsSelfMadeMessage(userId: number) {
-    console.log(this.userId === userId, ' checkIsSelfMadeMessage');
     return this.userId === userId;
   }
 
@@ -31,15 +30,10 @@ class GameSocket {
   }
 
   public sendUpdatedChessState(data: ChessGameState) {
-    console.log(data, ' sended data');
     this.socket.emit(ChessGameEvent.EVENT, { room: this.gameId, userId: this.userId, data });
   }
 
-  public sendLeaveViewer(data: ChessGameViewers) {
-    this.socket.emit(ChessGameEvent.VIEWERS, { room: this.gameId, userId: this.userId, data });
-  }
-
-  public sendJoinViewer(data: ChessGameViewers) {
+  public sendViewerEvent(data: ChessGameViewers) {
     this.socket.emit(ChessGameEvent.VIEWERS, { room: this.gameId, userId: this.userId, data });
   }
 
@@ -48,7 +42,6 @@ class GameSocket {
   }
 
   public sendUpdatedChessProcess(data: ChessGameProcess) {
-    console.log(data, ' sended data');
     this.socket.emit(ChessGameEvent.PROCESS, {
       room: this.gameId,
       userId: this.userId,
@@ -57,14 +50,13 @@ class GameSocket {
   }
 
   public connectUserToGameRoom() {
-    const data = { userId: this.userId, event: ChessGameMemberEvent.JOIN };
-    this.socket.emit(ChessGameEvent.JOIN_ROOM, { room: this.gameId, data });
+    const data = { room: this.gameId, userId: this.userId, event: ChessGameMemberEvent.JOIN };
+    this.socket.emit(ChessGameEvent.JOIN_ROOM, { room: this.gameId, userId: this.userId, data });
   }
 
   public disconnectUserFromGameRoom() {
-    console.log('emit leave room');
-    const data = { userId: this.userId, event: ChessGameMemberEvent.LEAVE };
-    this.socket.emit(ChessGameEvent.LEAVE_ROOM, { room: this.gameId, data });
+    const data = { room: this.gameId, userId: this.userId, event: ChessGameMemberEvent.LEAVE };
+    this.socket.emit(ChessGameEvent.LEAVE_ROOM, { room: this.gameId, userId: this.userId, data });
   }
 
   public registerOnChessGameEvent(callback: (state: ChessGameState) => void) {
@@ -72,8 +64,6 @@ class GameSocket {
       if (this.checkIsSelfMadeMessage(response.userId)) {
         return;
       }
-
-      console.log(response, 'response data');
 
       callback(response.data);
     });
@@ -95,7 +85,27 @@ class GameSocket {
     this.socket.on(
       ChessGameEvent.VIEWERS,
       (response: ChessGameWebsocketResponse<ChessGameViewers>) => {
-        console.log(response);
+        if (this.checkIsSelfMadeMessage(response.userId)) {
+          return;
+        }
+        callback(response.data);
+      },
+    );
+  }
+
+  public registerOnChessGameMember(callback: (memberData: ChessGameMember) => void) {
+    this.socket.on(
+      ChessGameEvent.LEAVE_ROOM,
+      (response: ChessGameWebsocketResponse<ChessGameMember>) => {
+        if (this.checkIsSelfMadeMessage(response.userId)) {
+          return;
+        }
+        callback(response.data);
+      },
+    );
+    this.socket.on(
+      ChessGameEvent.JOIN_ROOM,
+      (response: ChessGameWebsocketResponse<ChessGameMember>) => {
         if (this.checkIsSelfMadeMessage(response.userId)) {
           return;
         }
@@ -108,7 +118,6 @@ class GameSocket {
     this.socket.on(
       ChessGameEvent.PLAYER,
       (response: ChessGameWebsocketResponse<ChessGamePlayer>) => {
-        console.log(response, ' player response');
         if (this.checkIsSelfMadeMessage(response.userId)) {
           return;
         }
@@ -118,12 +127,14 @@ class GameSocket {
   }
 
   public onConnect(callback: () => void) {
-    console.log('connect');
     return this.socket.on('connect', callback);
   }
 
+  public onDisconnect(callback: () => void) {
+    return this.socket.on('disconnect', callback);
+  }
+
   public closeConnection() {
-    this.disconnectUserFromGameRoom();
     this.socket.close();
   }
 }

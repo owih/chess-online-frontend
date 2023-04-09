@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Grid } from '@mui/material';
 import BoardComponent from '../BoardComponent/BoardComponent';
 import ViewersPanel from '../ViewersPanel/ViewersPanel';
@@ -11,8 +11,11 @@ import {
   removeUserIdFromEvery,
   setBlackPlayerId,
   setGameProcess,
-  setGameState, setPlayerFromWebsocket,
-  setUserToViewers, setViewerFromWebsocket,
+  setGameState,
+  setMemberFromWebsocket,
+  setPlayerFromWebsocket,
+  setUserToViewers,
+  setViewerFromWebsocket,
   setWhitePlayerId,
 } from '../../store/reducers/ChessGameRoomSlice';
 import PlayerCard from '../PlayerCard/PlayerCard';
@@ -20,9 +23,13 @@ import { useGetManyUsersQuery, useGetPlayerQuery } from '../../services/userServ
 import Colors from '../../models/chess/Colors';
 import ChessGameViewers from '../../types/chess/chessGameViewers';
 import ChessGameMemberEvent from '../../types/chess/chessGameMemberEvent';
-import { removeUserFromEvery } from '../../store/reducers/ChessGameMembers';
 import ChessGamePlayer from '../../types/chess/chessGamePlayer';
-import { useSendUpdatedRoomMutation } from '../../services/chessService';
+import { useSendUpdatedMemberMutation, useSendUpdatedRoomMutation } from '../../services/chessService';
+import ChessGameEvent from '../../types/chess/chessGameEvent';
+import ChessGameMember from '../../types/chess/chessGameMember';
+import EatenFiguresPanel from '../EatenFiguresPanel/EatenFiguresPanel';
+import ChessGameEatenFigure from '../../types/chess/chessGameEatenFigure';
+import ChessGameCheck from '../../types/chess/chessGameCheck';
 
 type Props = {
   gameId: string;
@@ -30,7 +37,14 @@ type Props = {
 };
 
 export default function ChessGameRoom({ gameId, userId }: Props) {
+  const [eatenFigures, setEatenFigures] = useState<ChessGameEatenFigure[]>([]);
+  const [checkmateState, setCheckmateState] = useState<ChessGameCheck>({
+    isCheck: false,
+    isCheckmate: false,
+    king: null,
+  });
   const socket = useMemo<GameSocket>(() => (new GameSocket(gameId, userId)), []);
+
   const {
     viewersId, whitePlayerId, blackPlayerId, gameProcess,
   } = useAppSelector((state) => state.chessGameRoom);
@@ -45,7 +59,9 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
     id: blackPlayerId,
     color: Colors.BLACK,
   }, { skip: !blackPlayerId || blackPlayerId === userId });
-  const [sandUpdatedRoom] = useSendUpdatedRoomMutation();
+
+  const [sendUpdatedRoom] = useSendUpdatedRoomMutation();
+  const [sendUpdatedMember] = useSendUpdatedMemberMutation();
 
   const dispatch = useAppDispatch();
 
@@ -76,54 +92,71 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
     return fetchedViewers || [];
   }, [viewersId, fetchedViewers]);
 
+  const currentPlayerPosition: Colors | null = useMemo(() => {
+    if (userId === whitePlayerId) {
+      return Colors.WHITE;
+    }
+    if (userId === blackPlayerId) {
+      return Colors.BLACK;
+    }
+    return null;
+  }, [whitePlayerId, blackPlayerId]);
+
   useEffect(() => {
     const joinToViewers = () => {
-      console.log(viewersId, ' viewersId');
+      dispatch(removeUserIdFromEvery(userId));
       dispatch(setUserToViewers(userId));
 
-      // sandUpdatedRoom({
-      //   gameId, whitePlayerId, blackPlayerId, viewersId: [...viewersId, userId], gameProcess,
-      // });
+      sendUpdatedMember({
+        userId, gameId, event: ChessGameEvent.VIEWERS,
+      });
     };
     const updateWebsocketState = (state: ChessGameState) => {
       dispatch(setGameState(state));
     };
     const updateWebsocketViewers = (viewersData: ChessGameViewers) => {
-      console.log(viewersData, ' viewers data');
       dispatch(setViewerFromWebsocket(viewersData));
     };
     const updateWebsocketPlayer = (playerData: ChessGamePlayer) => {
-      console.log(playerData, ' players data');
       dispatch(setPlayerFromWebsocket(playerData));
     };
     const updateChessProcess = (process: ChessGameProcess) => {
-      console.log(process, ' update process');
       dispatch(setGameProcess(process));
+    };
+
+    const updateWebsocketMember = (memberData: ChessGameMember) => {
+      dispatch(setMemberFromWebsocket(memberData));
+    };
+
+    const closeTabHandler = () => {
+      sendUpdatedMember({ userId, gameId, event: ChessGameEvent.LEAVE_ROOM });
+      socket.disconnectUserFromGameRoom();
+      socket.closeConnection();
     };
 
     socket.connectToServer();
     socket.onConnect(() => {
-      console.log('on connect ');
       socket.connectUserToGameRoom();
       socket.registerOnChessGameEvent(updateWebsocketState);
       socket.registerOnChessGameProcess(updateChessProcess);
       socket.registerOnChessGameViewers(updateWebsocketViewers);
       socket.registerOnChessGamePlayer(updateWebsocketPlayer);
+      socket.registerOnChessGameMember(updateWebsocketMember);
       joinToViewers();
     });
 
+    window.addEventListener('beforeunload', closeTabHandler);
+
     return () => {
+      sendUpdatedMember({ userId, gameId, event: ChessGameEvent.LEAVE_ROOM });
       socket.closeConnection();
+      window.removeEventListener('beforeunload', closeTabHandler);
     };
   }, []);
 
-  useEffect(() => {
-    console.log(gameProcess);
-  }, [gameProcess]);
-
   const updateChessState = (updatedChessState: ChessGameState, currentPlayer: Colors) => {
     socket.sendUpdatedChessState(updatedChessState);
-    sandUpdatedRoom({
+    sendUpdatedRoom({
       gameId, state: updatedChessState, whitePlayerId, blackPlayerId, currentPlayer, viewersId, gameProcess,
     });
   };
@@ -131,6 +164,11 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
   const pauseGame = () => {
     dispatch(setGameProcess(ChessGameProcess.PAUSED));
     socket.sendUpdatedChessProcess(ChessGameProcess.PAUSED);
+  };
+
+  const resumeGame = () => {
+    dispatch(setGameProcess(ChessGameProcess.RESUMED));
+    socket.sendUpdatedChessProcess(ChessGameProcess.RESUMED);
   };
 
   const endGame = () => {
@@ -144,63 +182,79 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
   };
 
   const updateWhitePlayer = () => {
-    console.log(removeUserFromEvery);
     dispatch(removeUserIdFromEvery(userId));
     dispatch(setWhitePlayerId(userId));
-    socket.sendLeaveViewer({ userId, event: ChessGameMemberEvent.LEAVE });
+    socket.sendViewerEvent({ userId, event: ChessGameMemberEvent.LEAVE });
     socket.sendPlayerEvent({ userId, color: Colors.WHITE, event: ChessGameMemberEvent.JOIN });
 
-    sandUpdatedRoom({
-      gameId, whitePlayerId, blackPlayerId, viewersId, gameProcess,
+    sendUpdatedMember({
+      userId, gameId, event: ChessGameEvent.PLAYER, color: Colors.WHITE,
     });
   };
 
   const updateBlackPlayer = () => {
     dispatch(removeUserIdFromEvery(userId));
     dispatch(setBlackPlayerId(userId));
-    socket.sendLeaveViewer({ userId, event: ChessGameMemberEvent.LEAVE });
+    socket.sendViewerEvent({ userId, event: ChessGameMemberEvent.LEAVE });
     socket.sendPlayerEvent({ userId, color: Colors.BLACK, event: ChessGameMemberEvent.JOIN });
 
-    sandUpdatedRoom({
-      gameId, whitePlayerId, blackPlayerId, viewersId, gameProcess,
+    sendUpdatedMember({
+      userId, gameId, event: ChessGameEvent.PLAYER, color: Colors.BLACK,
     });
   };
 
   const updateViewers = () => {
     dispatch(removeUserIdFromEvery(userId));
     dispatch(setUserToViewers(userId));
-    socket.sendJoinViewer({ userId, event: ChessGameMemberEvent.JOIN });
+    socket.sendViewerEvent({ userId, event: ChessGameMemberEvent.JOIN });
 
-    sandUpdatedRoom({
-      gameId, whitePlayerId, blackPlayerId, viewersId, gameProcess,
+    sendUpdatedMember({
+      userId, gameId, event: ChessGameEvent.VIEWERS,
     });
   };
 
   return (
     <div>
-      <Button variant="contained" onClick={pauseGame}>Pause game</Button>
+      {gameProcess === ChessGameProcess.RESUMED && <Button variant="contained" onClick={pauseGame}>Pause game</Button>}
+      {gameProcess === ChessGameProcess.PAUSED && <Button variant="contained" onClick={resumeGame}>Resume game</Button>}
       <Button variant="contained" onClick={endGame}>End game</Button>
       <Button variant="contained" onClick={startGame}>Start game</Button>
       {isViewersLoading}
       {isWhitePlayerLoading}
       {isBlackPlayerLoading}
-      {`viewersId ${viewersId}`}
-      {`white ${whitePlayer}`}
-      {`black ${blackPlayer}`}
+      {`check ${JSON.stringify(checkmateState)}`}
       <Grid container spacing={2} wrap="nowrap">
         <Grid item>
           {blackPlayerId
             ? <PlayerCard color={Colors.BLACK} user={userForBlackPlayer} />
             : <Button variant="contained" onClick={updateBlackPlayer}>Join black</Button> }
+          <EatenFiguresPanel figuresList={eatenFigures} />
           {whitePlayerId
             ? <PlayerCard color={Colors.WHITE} user={userForWhitePlayer} />
             : <Button variant="contained" onClick={updateWhitePlayer}>Join white</Button> }
         </Grid>
         <Grid item>
-          <BoardComponent
-            chessGameProcess={gameProcess}
-            updateChessState={updateChessState}
-          />
+          <Grid container>
+            {checkmateState.isCheck && (
+              <Grid item>
+                Check
+              </Grid>
+            )}
+            <Grid item>
+              <BoardComponent
+                currentPlayerPosition={currentPlayerPosition}
+                chessGameProcess={gameProcess}
+                updateChessState={updateChessState}
+                setEatenFigures={setEatenFigures}
+                setCheckmateState={setCheckmateState}
+              />
+            </Grid>
+            {checkmateState.isCheckmate && (
+              <Grid item>
+                Checkmate
+              </Grid>
+            )}
+          </Grid>
         </Grid>
         <Grid item>
           <Button variant="contained" onClick={updateViewers}>Join viewers</Button>

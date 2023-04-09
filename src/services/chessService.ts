@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import ChessGameRoom from '../types/chess/chessGameRoom';
 import { updateStateFromApi } from '../store/reducers/ChessGameRoomSlice';
 import ChessGameRoomRaw from '../types/chess/chessGameRoomRaw';
+import ChessGameUpdatedMember from '../types/chess/chessGameUpdatedMember';
 
 export const chessApi = createApi({
   reducerPath: 'chessApi',
@@ -21,7 +22,6 @@ export const chessApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(updateStateFromApi(data));
-          console.log(data);
         } catch (e) {
           console.log(e);
         }
@@ -38,7 +38,16 @@ export const chessApi = createApi({
         },
       }),
     }),
+    sendUpdatedMember: build.mutation<boolean, ChessGameUpdatedMember>({
+      query: (newMemberState) => ({
+        url: 'chess/member',
+        method: 'POST',
+        body: {
+          ...newMemberState,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useStartChessGameQuery, useSendUpdatedRoomMutation } = chessApi;
+export const { useStartChessGameQuery, useSendUpdatedRoomMutation, useSendUpdatedMemberMutation } = chessApi;

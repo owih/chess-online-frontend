@@ -19,7 +19,10 @@ export default function AppRouter() {
           ? <Navigate to={`${useRouteList.chess.url}/f${new Date().getTime().toString()}`} />
           : <AuthorizationPage />}
       />
-      <Route path={`${useRouteList.chess.url}/:id`} element={isUserAuthorized ? <ChessRoomPage /> : <AuthorizationPage />} />
+      <Route
+        path={`${useRouteList.chess.url}/:id`}
+        element={isUserAuthorized ? <ChessRoomPage /> : <AuthorizationPage />}
+      />
       <Route path={useRouteList.lobby.url} element={<ChessLobbyPage />} />
     </Routes>
   );

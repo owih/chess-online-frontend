@@ -111,24 +111,18 @@ class Cell {
     this.figure.cell = this;
   }
 
-  moveFigure(target: Cell) {
+  moveFigure(target: Cell, board: Board) {
     if (this.figure && this.figure?.canMove(target)) {
       if (target.figure) {
-        this.addLostFigure(target.figure);
+        board.eatenFigures.push({
+          name: target.figure.name, img: target.figure.logo, eatenBy: this.figure.logo, id: Math.random(),
+        });
       }
       target.setFigure(this.figure);
       this.figure.moveFigure(target);
       const figureColor = this.figure.color;
       this.figure = null;
-      this.board.checkKingsState(figureColor);
-    }
-  }
-
-  addLostFigure(figure: Figure) {
-    if (figure.color === Colors.BLACK) {
-      this.board.lostBlackFigures.push(figure);
-    } else {
-      this.board.lostWhiteFigures.push(figure);
+      board.checkKingsState(figureColor);
     }
   }
 }

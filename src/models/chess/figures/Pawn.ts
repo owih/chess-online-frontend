@@ -73,7 +73,6 @@ class Pawn extends Figure {
   }
 
   replacePawn() {
-    console.log('end of the board');
     this.cell.setFigure(new Queen(this.color, this.cell));
   }
 }

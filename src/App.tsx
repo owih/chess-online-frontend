@@ -7,7 +7,6 @@ import { useAppSelector } from './hooks/redux';
 function App() {
   const isFirstUserFetching = useAppSelector((state) => state.user.isFirstLoading);
   const { isLoading } = useGetUserInfo();
-  console.log('app');
 
   return (
     <div className="App">

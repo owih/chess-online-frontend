@@ -27,6 +27,7 @@
       "class-methods-use-this": "off",
       "no-param-reassign": "off",
       "react/require-default-props": "off",
-      "max-len": ["error", { "code": 120 }]
+      "max-len": ["error", { "code": 120 }],
+      "consistent-return": "off"
     }
 }

@@ -21,7 +21,6 @@ export default function ModalSettings() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    console.log(data);
     if (!data) return;
     setForm({
       id: data.id,
@@ -35,7 +34,6 @@ export default function ModalSettings() {
     if (!form.name.trim().length) {
       return;
     }
-    console.log(form);
     changeUserSettings({ ...form });
   };
 

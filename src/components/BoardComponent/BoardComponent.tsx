@@ -3,27 +3,45 @@ import { useEffect, useState } from 'react';
 import Board from '../../models/chess/Board';
 import CellComponent from '../CellComponent/CellComponent';
 import Cell from '../../models/chess/Cell';
-import { useAppSelector } from '../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import ChessGameState from '../../types/chess/chessGameState';
 import ChessGameProcess from '../../types/chess/chessGameProcess';
 import Colors from '../../models/chess/Colors';
+import ChessGameEatenFigure from '../../types/chess/chessGameEatenFigure';
+import { setGameProcess } from '../../store/reducers/ChessGameRoomSlice';
+import ChessGameCheck from '../../types/chess/chessGameCheck';
 
 interface BoardProps {
   updateChessState: (updatedChessState: ChessGameState, currentPlayer: Colors) => void;
+  setEatenFigures: (figures: ChessGameEatenFigure[]) => void;
+  setCheckmateState: (checkState: ChessGameCheck) => void;
   chessGameProcess: ChessGameProcess;
+  currentPlayerPosition: Colors | null;
 }
 
-export default function BoardComponent({ updateChessState, chessGameProcess }: BoardProps) {
+export default function BoardComponent({
+  updateChessState, chessGameProcess, currentPlayerPosition, setEatenFigures, setCheckmateState,
+}: BoardProps) {
   const [board, setBoard] = useState<Board>(new Board());
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const chessGameState = useAppSelector((state) => state.chessGameRoom.state);
 
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
-    console.log(chessGameProcess);
+    if (chessGameProcess === ChessGameProcess.STARTED) {
+      const newBoard = new Board();
+      newBoard.initCells();
+      newBoard.addFigures();
+      setBoard(newBoard);
+      updateChessState(newBoard.getBoardState(), newBoard.currentPlayer);
+      setEatenFigures(newBoard.eatenFigures);
+      dispatch(setGameProcess(ChessGameProcess.RESUMED));
+    }
   }, [chessGameProcess]);
 
   useEffect(() => {
-    if (!chessGameState || !board) {
+    if (!chessGameState) {
       return;
     }
 
@@ -33,13 +51,15 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
       newBoard.addFigures();
       newBoard.applyStateFromServer(chessGameState);
       setBoard(newBoard);
+      setEatenFigures(chessGameState.eatenFigures);
+      setCheckmateState({ ...chessGameState.isCheckmateState });
       return;
     }
 
-    console.log(chessGameState, ' state update');
-    console.log(board);
     board.applyStateFromServer(chessGameState);
     setBoard(board.getCopyBoard());
+    setEatenFigures(chessGameState.eatenFigures);
+    setCheckmateState({ ...chessGameState.isCheckmateState });
   }, [chessGameState]);
 
   useEffect(() => {
@@ -47,30 +67,33 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
     newBoard.initCells();
     newBoard.addFigures();
     setBoard(newBoard);
-    console.log('INITED AND LOADED FIRST');
-    console.log(board.getBoardState());
   }, []);
 
   const updateBoardModel = () => {
+    if (!board) {
+      return;
+    }
     const newBoard = board.getCopyBoard();
     setBoard(newBoard);
   };
 
-  console.log('HIGHTLIGHT');
-
   const updateCellState = (cell: Cell | null) => {
+    if (!board) {
+      return;
+    }
     board.highlightTargetCells(cell);
     setSelectedCell(cell);
   };
 
   const onClickCell = (cell: Cell): any => {
-    if (selectedCell && selectedCell !== cell && selectedCell.figure?.canMove(cell)) {
-      selectedCell.moveFigure(cell);
-      updateCellState(null);
+    if (selectedCell && selectedCell.figure && selectedCell !== cell && selectedCell.figure.canMove(cell) && board) {
+      selectedCell.moveFigure(cell, board);
       board.toggleCurrentPlayer();
       updateChessState(board.getBoardState(), board.currentPlayer);
+      setEatenFigures(board.eatenFigures);
+      setCheckmateState({ ...board.isCheckmateState });
+      updateCellState(null);
       updateBoardModel();
-      console.log(board);
       return;
     }
 
@@ -79,17 +102,17 @@ export default function BoardComponent({ updateChessState, chessGameProcess }: B
       return;
     }
 
-    if (cell.figure?.color === board.currentPlayer) {
-      console.log(cell.figure.color);
-      console.log(board.currentPlayer);
-      console.log('logger');
+    if (board && cell.figure?.color === board.currentPlayer && board.currentPlayer === currentPlayerPosition) {
       updateCellState(cell);
     }
   };
 
   return (
-    <div className="board">
-      {board.cells.map((item, index) => (
+    <div className={['board',
+      chessGameProcess === ChessGameProcess.PAUSED ? 'paused' : '',
+      chessGameProcess === ChessGameProcess.ENDED ? 'ended' : ''].join(' ')}
+    >
+      {board && board.cells.map((item, index) => (
         <React.Fragment key={index}>
           {item.map((cell: Cell) => (
             <CellComponent

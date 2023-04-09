@@ -14,7 +14,7 @@ export enum FigureName {
 
 class Figure {
   color: Colors;
-  logo: typeof logo | null;
+  logo: typeof logo;
   cell: Cell;
   name: FigureName;
   id: number;
@@ -23,7 +23,7 @@ class Figure {
     this.color = color;
     this.cell = cell;
     this.cell.figure = this;
-    this.logo = null;
+    this.logo = logo;
     this.name = FigureName.FIGURE;
     this.id = Math.random();
   }

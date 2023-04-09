@@ -21,7 +21,7 @@ const initialState: ChessGameRoomStore = {
   whitePlayerId: null,
   blackPlayerId: null,
   viewersId: [],
-  gameProcess: ChessGameProcess.ENDED,
+  gameProcess: ChessGameProcess.RESUMED,
 };
 
 const chessGameRoomSlice = createSlice({
@@ -29,7 +29,6 @@ const chessGameRoomSlice = createSlice({
   initialState,
   reducers: {
     setGameState: (state, action: PayloadAction<ChessGameState>) => {
-      console.log(action.payload, ' setChessGameState');
       state.state = action.payload;
     },
     setGameId: (state, action: PayloadAction<string>) => {
@@ -39,15 +38,12 @@ const chessGameRoomSlice = createSlice({
       state.gameProcess = action.payload;
     },
     setWhitePlayerId: (state, action: PayloadAction<number | null>) => {
-      console.log(action.payload, ' set white player');
       state.whitePlayerId = action.payload;
     },
     setBlackPlayerId: (state, action: PayloadAction<number | null>) => {
-      console.log(action.payload, ' set black player');
       state.blackPlayerId = action.payload;
     },
     setViewerFromWebsocket: (state, action: PayloadAction<ChessGameViewers>) => {
-      console.log(action.payload, ' set black player');
       const { userId, event } = action.payload;
       if (event === ChessGameMemberEvent.JOIN) {
         if (state.whitePlayerId === userId) {
@@ -56,6 +52,21 @@ const chessGameRoomSlice = createSlice({
         if (state.blackPlayerId === userId) {
           state.blackPlayerId = null;
         }
+        state.viewersId.push(userId);
+      }
+      if (event === ChessGameMemberEvent.LEAVE) {
+        state.viewersId = state.viewersId.filter((item) => item !== userId);
+      }
+    },
+    setMemberFromWebsocket: (state, action: PayloadAction<ChessGameViewers>) => {
+      const { userId, event } = action.payload;
+      if (state.whitePlayerId === userId) {
+        state.whitePlayerId = null;
+      }
+      if (state.blackPlayerId === userId) {
+        state.blackPlayerId = null;
+      }
+      if (event === ChessGameMemberEvent.JOIN) {
         state.viewersId.push(userId);
       }
       if (event === ChessGameMemberEvent.LEAVE) {
@@ -73,7 +84,6 @@ const chessGameRoomSlice = createSlice({
         }
         state.viewersId = state.viewersId.filter((item) => item !== userId);
         state.whitePlayerId = userId;
-        console.log(state.viewersId);
         return;
       }
       if (color === Colors.WHITE && event === ChessGameMemberEvent.LEAVE) {
@@ -97,7 +107,7 @@ const chessGameRoomSlice = createSlice({
     },
     setUserToViewers: (state, action: PayloadAction<number>) => {
       if (state.viewersId.includes(action.payload)) {
-        return;
+        return { ...state };
       }
       state.viewersId.push(action.payload);
     },
@@ -125,7 +135,12 @@ const chessGameRoomSlice = createSlice({
         state.viewersId = state.viewersId.filter((item) => item !== action.payload);
       }
     },
-    updateStateFromApi: (state, action: PayloadAction<ChessGameRoom>) => action.payload,
+    updateStateFromApi: (state, action: PayloadAction<ChessGameRoom>) => {
+      state.viewersId = action.payload.viewersId;
+      state.whitePlayerId = action.payload.whitePlayerId;
+      state.blackPlayerId = action.payload.blackPlayerId;
+      state.state = action.payload.state;
+    },
   },
 });
 
@@ -144,6 +159,7 @@ export const {
   setPlayerFromWebsocket,
   removeUserIdFromEvery,
   removeUserFromWhitePlayerId,
+  setMemberFromWebsocket,
   setGameProcess,
 } = actions;
 export default reducer;

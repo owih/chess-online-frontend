@@ -57,7 +57,6 @@ export const userApi = createApi({
       async onQueryStarted(idm, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log(data, ' many users');
           dispatch(setViewers(data));
         } catch (e) {
           console.log(e);
@@ -81,9 +80,6 @@ export const userApi = createApi({
             dispatch(removeUser());
           }
         }
-      },
-      async onCacheEntryAdded() {
-        console.log('cache');
       },
     }),
     changeUserSettings: build.mutation<User, User>({

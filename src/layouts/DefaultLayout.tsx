@@ -14,7 +14,7 @@ function DefaultLayout({ isLoading, children }: Props) {
     );
   }
   return (
-    <div>
+    <div className="wrapper">
       <Container>
         {children}
       </Container>
