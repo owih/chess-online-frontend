@@ -1,4 +1,5 @@
 {
+    "root": true,
     "env": {
         "browser": true,
         "es2021": true
@@ -27,7 +28,7 @@
       "class-methods-use-this": "off",
       "no-param-reassign": "off",
       "react/require-default-props": "off",
-      "max-len": ["error", { "code": 120 }],
+      "max-len": ["error", { "code": 140 }],
       "consistent-return": "off"
     }
 }

@@ -3,19 +3,31 @@
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
-  border: 8px solid $black;
+  border: 4px solid $black;
+  width: 300px;
+  height: 300px;
 
+  @include media-breakpoint-up(we) {
+    width: 420px;
+    height: 420px;
+  }
+  @include media-breakpoint-up(sm) {
+    width: 580px;
+    height: 580px;
+  }
+  @include media-breakpoint-up(md) {
+    width: 800px;
+    height: 800px;
+  }
   @include media-breakpoint-up(lg) {
     width: 800px;
     height: 800px;
   }
 }
 
+.paused,
 .ended {
   pointer-events: none;
-}
-
-.paused {
   &:before {
     content: '';
     position: absolute;
@@ -63,5 +75,15 @@ button.cell {
 
   &_target {
     background-color: $target-cell;
+  }
+}
+
+.checkmate-state {
+  font-size: 18px;
+  font-weight: bold;
+  color: $target-cell;
+
+  &:not(:first-child) {
+    margin-top: 12px;
   }
 }

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query';
+import { Grid } from '@mui/material';
 import { useAppSelector } from '../hooks/redux';
 import { useStartChessGameQuery } from '../services/chessService';
 import AuthorizationForm from '../components/AuthorizationForm/AuthorizationForm';
@@ -19,15 +20,17 @@ export default function ChessRoomPage() {
 
   if (!gameId || !userId) {
     return (
-      <AuthorizationForm />
+      <Grid container alignItems="center" justifyContent="center">
+        <Grid item>
+          <AuthorizationForm />
+        </Grid>
+      </Grid>
     );
   }
 
   return (
-    <div className="container h-full">
-      <div className="flex justify-center items-center h-full">
-        <ChessGameRoom gameId={gameId} userId={userId} />
-      </div>
+    <div>
+      <ChessGameRoom gameId={gameId} userId={userId} />
     </div>
   );
 }

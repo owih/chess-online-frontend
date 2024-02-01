@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Avatar } from '@mui/material';
 import ChessGameEatenFigure from '../../types/chess/chessGameEatenFigure';
 
 type Props = {
@@ -8,7 +9,14 @@ type Props = {
 export default function EatenFigureCard({ figure }: Props) {
   return (
     <div>
-      {figure.name}
+      <Avatar
+        alt={`${figure.name}-${figure.id}`}
+        src={figure.img}
+        sx={{
+          width: 24,
+          height: 24,
+        }}
+      />
     </div>
   );
 }

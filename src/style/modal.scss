@@ -6,16 +6,4 @@
   width: 400px;
   background-color: $white;
   padding: 32px;
-
-  @include media-breakpoint-up(lg) {
-    width: 1200px;
-    min-height: 80vh;
-  }
-
-  &_small {
-    @include media-breakpoint-up(lg) {
-      width: 600px;
-      min-height: 600px;
-    }
-  }
 };

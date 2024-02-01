@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Grid } from '@mui/material';
+import {
+  Button, Grid, useMediaQuery, useTheme,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import useRouteList from '../../composables/useRouteList';
 import BoardComponent from '../BoardComponent/BoardComponent';
 import ViewersPanel from '../ViewersPanel/ViewersPanel';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
@@ -63,7 +67,11 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
   const [sendUpdatedRoom] = useSendUpdatedRoomMutation();
   const [sendUpdatedMember] = useSendUpdatedMemberMutation();
 
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
 
   const userForWhitePlayer = useMemo(() => {
     if (!whitePlayerId) {
@@ -101,6 +109,32 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
     }
     return null;
   }, [whitePlayerId, blackPlayerId]);
+
+  const checkmateForWhiteState: string = useMemo(() => {
+    if (checkmateState.king !== 'WHITE') {
+      return '';
+    }
+    if (checkmateState.isCheckmate) {
+      return 'ITS CHECKMATE';
+    }
+    if (checkmateState.isCheck) {
+      return 'ITS CHECK';
+    }
+    return '';
+  }, [checkmateState]);
+
+  const checkmateForBlackState: string = useMemo(() => {
+    if (checkmateState.king !== 'BLACK') {
+      return '';
+    }
+    if (checkmateState.isCheckmate) {
+      return 'ITS CHECKMATE';
+    }
+    if (checkmateState.isCheck) {
+      return 'ITS CHECK';
+    }
+    return '';
+  }, [checkmateState]);
 
   useEffect(() => {
     const joinToViewers = () => {
@@ -213,52 +247,87 @@ export default function ChessGameRoom({ gameId, userId }: Props) {
     });
   };
 
+  const goToMainPage = () => {
+    navigate(useRouteList.home.url);
+  };
+
+  useEffect(() => {
+    if (checkmateState.isCheckmate) {
+      endGame();
+    }
+  }, [checkmateState]);
+
   return (
     <div>
-      {gameProcess === ChessGameProcess.RESUMED && <Button variant="contained" onClick={pauseGame}>Pause game</Button>}
-      {gameProcess === ChessGameProcess.PAUSED && <Button variant="contained" onClick={resumeGame}>Resume game</Button>}
-      <Button variant="contained" onClick={endGame}>End game</Button>
-      <Button variant="contained" onClick={startGame}>Start game</Button>
-      {isViewersLoading}
-      {isWhitePlayerLoading}
-      {isBlackPlayerLoading}
-      {`check ${JSON.stringify(checkmateState)}`}
-      <Grid container spacing={2} wrap="nowrap">
+      <div className="hidden">
+        forbidden*
+        {isViewersLoading}
+        {isWhitePlayerLoading}
+        {isBlackPlayerLoading}
+      </div>
+      <Grid container spacing={2} justifyContent="center" className="mb-4">
         <Grid item>
-          {blackPlayerId
-            ? <PlayerCard color={Colors.BLACK} user={userForBlackPlayer} />
-            : <Button variant="contained" onClick={updateBlackPlayer}>Join black</Button> }
-          <EatenFiguresPanel figuresList={eatenFigures} />
-          {whitePlayerId
-            ? <PlayerCard color={Colors.WHITE} user={userForWhitePlayer} />
-            : <Button variant="contained" onClick={updateWhitePlayer}>Join white</Button> }
+          <Button variant="contained" onClick={goToMainPage}>Main page</Button>
         </Grid>
+        {gameProcess !== ChessGameProcess.ENDED && (
         <Grid item>
-          <Grid container>
-            {checkmateState.isCheck && (
-              <Grid item>
-                Check
-              </Grid>
+          {gameProcess === ChessGameProcess.RESUMED && <Button variant="contained" onClick={pauseGame}>Pause game</Button>}
+          {gameProcess === ChessGameProcess.PAUSED && <Button variant="contained" onClick={resumeGame}>Resume game</Button>}
+        </Grid>
+        )}
+        {gameProcess !== ChessGameProcess.ENDED && (
+          <Grid item>
+            <Button variant="contained" onClick={endGame}>End game</Button>
+          </Grid>
+        )}
+        <Grid item>
+          <Button variant="contained" onClick={startGame}>Restart game</Button>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} wrap="nowrap" direction={isSmallScreen ? 'column' : 'row'}>
+        <Grid item container direction={isSmallScreen ? 'row' : 'column'} justifyContent="space-between" alignItems="center">
+          <Grid item>
+            {blackPlayerId
+              ? <PlayerCard user={userForBlackPlayer} />
+              : <Button variant="contained" onClick={updateBlackPlayer}>Join black</Button> }
+            {checkmateForBlackState && (
+            <div className="checkmate-state">
+              {checkmateForBlackState}
+            </div>
             )}
-            <Grid item>
-              <BoardComponent
-                currentPlayerPosition={currentPlayerPosition}
-                chessGameProcess={gameProcess}
-                updateChessState={updateChessState}
-                setEatenFigures={setEatenFigures}
-                setCheckmateState={setCheckmateState}
-              />
-            </Grid>
-            {checkmateState.isCheckmate && (
-              <Grid item>
-                Checkmate
-              </Grid>
+          </Grid>
+          <Grid item>
+            <EatenFiguresPanel figuresList={eatenFigures} />
+          </Grid>
+          <Grid item>
+            {checkmateForWhiteState && (
+            <div className="checkmate-state">
+              {checkmateForWhiteState}
+            </div>
             )}
+            {whitePlayerId
+              ? <PlayerCard user={userForWhitePlayer} />
+              : <Button variant="contained" onClick={updateWhitePlayer}>Join white</Button>}
           </Grid>
         </Grid>
         <Grid item>
-          <Button variant="contained" onClick={updateViewers}>Join viewers</Button>
-          <ViewersPanel viewers={viewersForViewersPanel} />
+          <Grid container item alignItems="center" justifyContent="center">
+            <BoardComponent
+              currentPlayerPosition={currentPlayerPosition}
+              chessGameProcess={gameProcess}
+              updateChessState={updateChessState}
+              setEatenFigures={setEatenFigures}
+              setCheckmateState={setCheckmateState}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} item direction="column">
+          <Grid item>
+            <Button variant="contained" onClick={updateViewers}>Join viewers</Button>
+          </Grid>
+          <Grid item>
+            <ViewersPanel viewers={viewersForViewersPanel} />
+          </Grid>
         </Grid>
       </Grid>
     </div>

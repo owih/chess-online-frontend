@@ -11,6 +11,10 @@ const initialState: ModalsStore = {
     name: ModalName.SETTINGS,
     isOpen: false,
   },
+  [ModalName.INFO]: {
+    name: ModalName.INFO,
+    isOpen: false,
+  },
 };
 
 const modalsSlice = createSlice({

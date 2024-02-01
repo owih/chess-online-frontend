@@ -25,15 +25,19 @@ export default function HomePage() {
 
   return (
     <div>
-      <Grid container>
+      <Grid container spacing={2} alignItems="center" justifyContent="center">
         <Grid lg={6} item>
           <WelcomePanel />
         </Grid>
-        <Grid lg={6} item>
-          {isUserAuthorized
-            ? <UserInfoPanel />
-            : <ModalAuthorization />}
-          <Button type="button" variant="contained" onClick={onClickStartGame}>Start game!</Button>
+        <Grid container lg={6} item direction="column" spacing={2}>
+          <Grid item>
+            {isUserAuthorized
+              ? <UserInfoPanel />
+              : <ModalAuthorization />}
+          </Grid>
+          <Grid item>
+            <Button type="button" variant="contained" onClick={onClickStartGame}>Start game!</Button>
+          </Grid>
         </Grid>
       </Grid>
     </div>

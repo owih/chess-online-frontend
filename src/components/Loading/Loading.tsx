@@ -2,8 +2,8 @@ import * as React from 'react';
 
 export default function Loading() {
   return (
-    <div>
-      Loading
+    <div className="loader loader_dark">
+      <div className="loading-animation" />
     </div>
   );
 }

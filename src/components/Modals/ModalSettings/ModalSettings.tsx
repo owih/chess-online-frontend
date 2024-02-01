@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import {
+  Box, Button, Grid, TextField,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import ModalComponent from '../ModalComponent/ModalComponent';
 import { useChangeUserSettingsMutation } from '../../../services/userService';
@@ -44,17 +46,22 @@ export default function ModalSettings() {
   return (
     <div>
       <Button type="button" variant="contained" onClick={onClickSettings}>Settings</Button>
-      <ModalComponent modalName={ModalName.SETTINGS} title="Authorization">
+      <ModalComponent modalName={ModalName.SETTINGS} title="Account settings">
         <Box component="form" onSubmit={onSubmitFormHandler}>
-          {data && JSON.stringify(data)}
-          <TextField
-            required
-            variant="outlined"
-            label="Name"
-            value={form.name}
-            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-          />
-          <Button variant="contained" type="submit">Submit</Button>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item>
+              <TextField
+                required
+                variant="outlined"
+                label="Name"
+                value={form.name}
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </Grid>
+            <Grid item>
+              <Button variant="contained" type="submit">Submit</Button>
+            </Grid>
+          </Grid>
           {(isLoading || isUserLoading) && 'loading'}
           {(error || getUserError) && 'Something went wrong!'}
         </Box>

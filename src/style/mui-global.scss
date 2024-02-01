@@ -1,0 +1,14 @@
+.MuiTypography-h5 {
+  &:not(:last-child) {
+    margin-bottom: 20px;
+  }
+}
+
+.MuiDivider-fullWidth {
+  &:not(:first-child) {
+    margin-top: 8px;
+  }
+  &:not(:last-child) {
+    margin-bottom: 8px;
+  }
+}
