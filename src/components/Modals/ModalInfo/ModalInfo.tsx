@@ -12,7 +12,7 @@ export default function ModalInfo() {
   const dispatch = useAppDispatch();
 
   const onClickAuthorization = () => {
-    dispatch(toggle(ModalName.AUTH));
+    dispatch(toggle(ModalName.INFO));
   };
 
   return (
