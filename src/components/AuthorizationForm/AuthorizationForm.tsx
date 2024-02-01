@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Button, TextField } from '@mui/material';
+import { Button, Grid, TextField } from '@mui/material';
 import { useCreateUserMutation } from '../../services/userService';
 import { useAppDispatch } from '../../hooks/redux';
 import { toggle } from '../../store/reducers/ModalsSlice';
@@ -23,14 +23,20 @@ export default function AuthorizationForm() {
   };
   return (
     <form onSubmit={onSubmitFormHandler}>
-      <TextField
-        required
-        variant="outlined"
-        label="Name"
-        value={form.name}
-        onChange={(e) => setForm({ name: e.target.value })}
-      />
-      <Button variant="contained" type="submit">Submit</Button>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item>
+          <TextField
+            required
+            variant="outlined"
+            label="Name"
+            value={form.name}
+            onChange={(e) => setForm({ name: e.target.value })}
+          />
+        </Grid>
+        <Grid item>
+          <Button variant="contained" type="submit">Submit</Button>
+        </Grid>
+      </Grid>
       {isLoading && 'loading'}
       {error && 'Something went wrong!'}
     </form>

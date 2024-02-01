@@ -11,16 +11,16 @@ import { toggle } from '../../../store/reducers/ModalsSlice';
 export default function ModalInfo() {
   const dispatch = useAppDispatch();
 
-  const onClickAuthorization = () => {
+  const onClickInfo = () => {
     dispatch(toggle(ModalName.INFO));
   };
 
   return (
     <div>
-      <IconButton size="large" color="info" onClick={onClickAuthorization}>
+      <IconButton size="large" color="info" onClick={onClickInfo}>
         <HelpCenter />
       </IconButton>
-      <ModalComponent modalName={ModalName.AUTH} title="Info">
+      <ModalComponent modalName={ModalName.INFO} title="Info">
         <Box>
           <Typography variant="button" display="block" gutterBottom>
             Instructions
