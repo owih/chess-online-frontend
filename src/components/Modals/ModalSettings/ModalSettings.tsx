@@ -19,6 +19,7 @@ export default function ModalSettings() {
   });
   const { data, error: getUserError, isLoading: isUserLoading } = useGetUserInfo();
   const [changeUserSettings, { error, isLoading }] = useChangeUserSettingsMutation();
+  const [validation, setValidation] = useState<string>('');
 
   const dispatch = useAppDispatch();
 
@@ -33,9 +34,11 @@ export default function ModalSettings() {
 
   const onSubmitFormHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim().length) {
+    if (!form.name.trim().length || form.name.trim().length > 15 || form.name.trim().length < 3) {
+      setValidation('Name must be less than 15 and more than 3 characters');
       return;
     }
+    setValidation('');
     changeUserSettings({ ...form });
   };
 
@@ -62,6 +65,7 @@ export default function ModalSettings() {
               <Button variant="contained" type="submit">Submit</Button>
             </Grid>
           </Grid>
+          {validation}
           {(isLoading || isUserLoading) && 'loading'}
           {(error || getUserError) && 'Something went wrong!'}
         </Box>

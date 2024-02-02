@@ -8,14 +8,17 @@ import ModalName from '../../types/app/Modal/modalName';
 
 export default function AuthorizationForm() {
   const [form, setForm] = useState<{ name: string }>({ name: '' });
+  const [validation, setValidation] = useState<string>('');
   const [authorization, { error, isLoading }] = useCreateUserMutation();
   const dispatch = useAppDispatch();
 
   const onSubmitFormHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim().length || form.name.trim().length > 15 || form.name.trim().length < 3) {
+      setValidation('Name must be less than 15 and more than 3 characters');
       return;
     }
+    setValidation('');
     authorization(form.name)
       .then(() => {
         dispatch(toggle(ModalName.AUTH));
@@ -37,6 +40,7 @@ export default function AuthorizationForm() {
           <Button variant="contained" type="submit">Submit</Button>
         </Grid>
       </Grid>
+      {validation}
       {isLoading && 'loading'}
       {error && 'Something went wrong!'}
     </form>
